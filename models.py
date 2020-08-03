@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, DateTime
+from sqlalchemy import Column, Integer, String, DateTime, create_engine
 from sqlalchemy.ext.declarative import declarative_base
 
 Base = declarative_base()
@@ -31,7 +31,7 @@ class Person(Base):
     sha1 = Column(String(100))
     sha256 = Column(String(100))
     dob = Column(DateTime)
-    days_to_bd = Column(String(100))
+    days_to_bd = Column(Integer)
     age = Column(Integer)
     registered_date = Column(DateTime)
     registered_age = Column(Integer)
