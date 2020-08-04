@@ -87,6 +87,8 @@ def populate_db():
         ))
     session_sql.bulk_save_objects(people)
 
+# TODO: __repr__
+
 
 if __name__ == "__main__":
     session_sql = session_creator()
