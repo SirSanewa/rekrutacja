@@ -26,6 +26,7 @@ class Person(Base):
     uuid = Column(String(100))
     username = Column(String(100))
     password = Column(String(100))
+    password_strenght = Column(Integer)
     salt = Column(String(100))
     md5 = Column(String(100))
     sha1 = Column(String(100))
