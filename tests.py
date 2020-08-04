@@ -8,9 +8,10 @@ from models import Person, Base
 
 class TestDB(unittest.TestCase):
     def setUp(self):
-        self.engine = create_engine("sqlite:///:memory:")
-        DBSession = sessionmaker(bind=self.engine)
+        engine = create_engine("sqlite:///:memory:")
+        DBSession = sessionmaker(bind=engine)
         self.sql_session = DBSession()
+        Base.metadata.create_all(engine)
         new_person = Person(
             gender="male",
             title="MR",
@@ -45,10 +46,13 @@ class TestDB(unittest.TestCase):
             id_value="123",
             nationality="PL"
         )
-        Base.metadata.create_all(self.engine)
         self.sql_session.add(new_person)
 
     def test_db_insert_data(self):
+        """
+        Testes if item is successfully added to in memory db
+        :return:
+        """
         result = self.sql_session.query(Person).all()
         self.assertEqual(len(result), 1)
 
