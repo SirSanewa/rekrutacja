@@ -2,22 +2,33 @@ from sqlalchemy import func, desc
 from models import Person
 from session import session_creator
 import argparse
+from datetime import datetime
 
 
 def percentage(number, total):
-    return (number * 100)/total
+    """
+    Calculates and returns percentage value from given number and total amount.
+    :param number: int
+    :param total: int
+    :return: percentage: int
+    """
+    return (number * 100) / total
 
 
 def gender_proportions():
-    total_rows = sql_session.query(Person)\
+    """
+    Prints gender proportions of db population.
+    :return:
+    """
+    total_rows = sql_session.query(Person) \
         .count()
 
-    men = sql_session.query(Person)\
-        .filter(Person.gender == "male")\
+    men = sql_session.query(Person) \
+        .filter(Person.gender == "male") \
         .count()
 
-    women = sql_session.query(Person)\
-        .filter(Person.gender == "female")\
+    women = sql_session.query(Person) \
+        .filter(Person.gender == "female") \
         .count()
 
     men_percent = percentage(men, total_rows)
@@ -26,6 +37,12 @@ def gender_proportions():
 
 
 def average_age(option="total"):
+    """
+    Prints average age depending on option chosen from {'total', 'male', 'female'}. Default 'total'.
+    Raises Value Error if option other then allowed.
+    :param option: str, default 'total'
+    :return:
+    """
     populations = {"total", "male", "female"}
     if option not in populations:
         raise ValueError("Used unsupported population")
@@ -42,16 +59,28 @@ def average_age(option="total"):
     print(f"Average age for the selected population({option}) is {age_avg} years.")
 
 
-def sqlalch_count_grouped(row, amount):
-    result = sql_session.query(row, func.count(row).label("quantity"))\
-        .group_by(row)\
-        .order_by(desc("quantity"))\
-        .limit(amount)\
+def sqlalch_count_grouped(attribute, amount):
+    """
+    Counts grouped rows from db by given attribute.
+    :param attribute: class: sqlalchemy.orm.attributes.InstrumentedAttribute
+    :param amount: int
+    :return: result: list
+    """
+    result = sql_session.query(attribute, func.count(attribute).label("quantity")) \
+        .group_by(attribute) \
+        .order_by(desc("quantity")) \
+        .limit(amount) \
         .all()
     return result
 
 
 def most_common_cities(amount):
+    """
+    Prints number of most common cities from db with number they appear. Used sqlalch_count_grouped().
+    :param amount: int
+    :return:
+    """
+    print(type(Person.city))
     popular_cities = sqlalch_count_grouped(Person.city, amount)
 
     print(f"Lista {amount} najczęściej występujących miast:")
@@ -60,17 +89,65 @@ def most_common_cities(amount):
 
 
 def most_common_pw(amount):
+    """
+    Prints number of most common passwords from db with number they appear. Used sqlalch_count_grouped().
+    :param amount: int
+    :return:
+    """
     common_pw = sqlalch_count_grouped(Person.password, amount)
 
     print(f"Lista {amount} najczęściej występujących haseł:")
     for pw, count in common_pw:
-        print(f"\tHasło: {pw} - użyto {count} razy")
+        print(f"\tHasło: '{pw}' - użyto {count} razy")
+
+
+def str_to_datetime(date_str):
+    """
+    Converts date string to datetime object.
+    :param date_str: str
+    :return: datetime object
+    """
+    return datetime.strptime(date_str, "%Y-%m-%d")
+
+
+def born_between(str_start, str_end):
+    """
+    Prints all people (firstnames, lastnames and d.o.b.) from db that were born between given dates.
+    Dates are given as string and converted to datetime with str_to_datetime(). Raises ValueError if start date is
+    bigger then end date.
+    :param str_start: str
+    :param str_end: str
+    :return:
+    """
+    date_start = str_to_datetime(str_start)
+    date_end = str_to_datetime(str_end)
+
+    if date_start > date_end:
+        raise ValueError("Wprowadzono niepoprawne daty")
+
+    results = sql_session.query(Person) \
+        .filter(Person.dob >= date_start) \
+        .filter(Person.dob <= date_end) \
+        .order_by(Person.dob) \
+        .all()
+    print(f"Liczba {len(results)} osób urodzonych pomiędzy {str_start} a {str_end}:")
+    for person in results:
+        print(f"\t- {person.firstname} {person.lastname}, date of birth: {datetime.strftime(person.dob, '%Y-%m-%d')}")
 
 
 if __name__ == "__main__":
     sql_session = session_creator()
 
     parser = argparse.ArgumentParser()
+    subparsers = parser.add_subparsers(dest="born_between")
+
+    dates_parser = subparsers.add_parser("born_between", help="Return all people born between given dates")
+
+    dates_parser.add_argument("-s", "--start_date", action="store", metavar="", required=True,
+                              help="Start date in format YYYY-MM-DD for born_between")
+    dates_parser.add_argument("-e", "--end_date", action="store", metavar="", required=True,
+                              help="End date in format YYYY-MM-DD for born_between")
+
     parser.add_argument("-g", "--gender_proportion", action="store_true",
                         help="Returns gender proportions of the population")
     parser.add_argument("-a", "--average_age", choices=["total", "male", "female"], const="total", nargs="?",
@@ -79,6 +156,7 @@ if __name__ == "__main__":
                         help="Returns number of most common cities")
     parser.add_argument("-p", "--common_password", metavar="",
                         help="Returns number of most common password")
+
     args = parser.parse_args()
 
     if args.gender_proportion:
@@ -89,3 +167,8 @@ if __name__ == "__main__":
         most_common_cities(args.common_cities)
     if args.common_password:
         most_common_pw(args.common_password)
+    if args.born_between:
+        if args.start_date and args.end_date:
+            born_between(args.start_date, args.end_date)
+
+# TODO: funkcja na parsy
