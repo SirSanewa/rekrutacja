@@ -1,5 +1,4 @@
-from sqlalchemy import func
-
+from sqlalchemy import func, desc
 from models import Person
 from session import session_creator
 import argparse
@@ -43,6 +42,31 @@ def average_age(option="total"):
     print(f"Average age for the selected population({option}) is {age_avg} years.")
 
 
+def sqlalch_count_grouped(row, amount):
+    result = sql_session.query(row, func.count(row).label("quantity"))\
+        .group_by(row)\
+        .order_by(desc("quantity"))\
+        .limit(amount)\
+        .all()
+    return result
+
+
+def most_common_cities(amount):
+    popular_cities = sqlalch_count_grouped(Person.city, amount)
+
+    print(f"Lista {amount} najczęściej występujących miast:")
+    for city, count in popular_cities:
+        print(f"\tMiasto: {city} - wystąpiło {count} razy")
+
+
+def most_common_pw(amount):
+    common_pw = sqlalch_count_grouped(Person.password, amount)
+
+    print(f"Lista {amount} najczęściej występujących haseł:")
+    for pw, count in common_pw:
+        print(f"\tHasło: {pw} - użyto {count} razy")
+
+
 if __name__ == "__main__":
     sql_session = session_creator()
 
@@ -51,10 +75,17 @@ if __name__ == "__main__":
                         help="Returns gender proportions of the population")
     parser.add_argument("-a", "--average_age", choices=["total", "male", "female"], const="total", nargs="?",
                         help="Returns average age of the selected population from [male, female, total]. Default total")
-
+    parser.add_argument("-c", "--common_cities", metavar="",
+                        help="Returns number of most common cities")
+    parser.add_argument("-p", "--common_password", metavar="",
+                        help="Returns number of most common password")
     args = parser.parse_args()
 
-    if args.sex_proportion:
+    if args.gender_proportion:
         gender_proportions()
     if args.average_age:
         average_age(args.average_age)
+    if args.common_cities:
+        most_common_cities(args.common_cities)
+    if args.common_password:
+        most_common_pw(args.common_password)
