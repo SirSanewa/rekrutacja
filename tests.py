@@ -81,8 +81,8 @@ class TestDBPopulate(unittest.TestCase):
         self.nr2 = "54-89-2-985()da"
 
     def test_days_till_bd(self):
-        self.assertEqual(days_till_bd(self.dob1), 86)
-        self.assertEqual(days_till_bd(self.dob2), 118)
+        self.assertEqual(days_till_bd(self.dob1), 85)
+        self.assertEqual(days_till_bd(self.dob2), 117)
         self.assertEqual(type(days_till_bd(self.dob1)), int)
 
     def test_str_to_dt(self):
