@@ -15,7 +15,11 @@ def days_till_bd(dob):
     day = dob.day
     bd_date = datetime(year=now.year, month=month, day=day)
     if bd_date < now:
-        bd_date = datetime(year=now.year + 1, month=month, day=day)
+        # to cover February 29th and change it to February 28th
+        try:
+            bd_date = datetime(year=now.year + 1, month=month, day=day)
+        except ValueError:
+            bd_date = datetime(year=now.year + 1, month=month, day=day - 1)
     diff = bd_date - now
     return diff.days + 1
 
@@ -67,7 +71,7 @@ def populate_db():
     :return:
     """
     people = []
-    url = "https://randomuser.me/api/?results=1000"
+    url = "https://randomuser.me/api/?results=1000&password=upper,lower,number,special,1-16&exc=picture&noinfo"
 
     response = requests.get(url)
     data = response.json()
