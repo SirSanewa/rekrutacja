@@ -40,7 +40,8 @@ def str_to_dt(str_date):
     :param str_date: str
     :return: datetime object
     """
-    return datetime.strptime(str_date, "%Y-%m-%dT%H:%M:%S.%fZ")
+    simple_date = str_date[:10]
+    return datetime.strptime(simple_date, "%Y-%m-%d")
 
 
 def password_safety(password):
