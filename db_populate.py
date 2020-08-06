@@ -21,7 +21,7 @@ def days_till_bd(dob):
         except ValueError:
             bd_date = datetime(year=now.year + 1, month=month, day=day - 1)
     diff = bd_date - now
-    # Adding plus 1 to convert rest of the equation (hours, mins, secs) to full day.
+    # Adding plus 1 to convert rest of the equation (hours, min, secs) to full day.
     return diff.days + 1
 
 
