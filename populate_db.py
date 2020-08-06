@@ -21,6 +21,7 @@ def days_till_bd(dob):
         except ValueError:
             bd_date = datetime(year=now.year + 1, month=month, day=day - 1)
     diff = bd_date - now
+    # Adding plus 1 to convert rest of the equation (hours, mins, secs) to full day.
     return diff.days + 1
 
 
@@ -44,28 +45,6 @@ def str_to_dt(str_date):
     return datetime.strptime(simple_date, "%Y-%m-%d")
 
 
-def password_safety(password):
-    """
-    Calculates password's safety and returns score as an int.
-    :param password: str
-    :return: score int
-    """
-    pts = 0
-    str_func_list = [
-        {"function": str.islower, "points": 1},
-        {"function": str.isupper, "points": 2},
-        {"function": str.isdigit, "points": 1},
-    ]
-    for element in str_func_list:
-        if sum(map(element["function"], password)) >= 1:
-            pts += element["points"]
-    if len(password) >= 8:
-        pts += 5
-    if not str.isalnum(password):
-        pts += 3
-    return pts
-
-
 def populate_db():
     """
     Connects to API to get required data and populates the db.
@@ -78,7 +57,6 @@ def populate_db():
     data = response.json()
     for person in data["results"]:
         dob = str_to_dt(person["dob"]["date"])
-        password = person["login"]["password"]
         people.append(Person(
             gender=person["gender"],
             title=person["name"]["title"],
@@ -97,8 +75,7 @@ def populate_db():
             email=person["email"],
             uuid=person["login"]["uuid"],
             username=person["login"]["username"],
-            password=password,
-            password_strenght=password_safety(password),
+            password=person["login"]["password"],
             salt=person["login"]["salt"],
             md5=person["login"]["md5"],
             sha1=person["login"]["sha1"],

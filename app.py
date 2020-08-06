@@ -135,9 +135,45 @@ def born_between(str_start, str_end):
         print(f"\t- {person.firstname} {person.lastname}, date of birth: {datetime.strftime(person.dob, '%Y-%m-%d')}")
 
 
-if __name__ == "__main__":
-    sql_session = session_creator()
+def password_safety_score(password):
+    """
+    Calculates password's safety and returns score as an int.
+    :param password: str
+    :return: score int
+    """
+    pts = 0
+    str_func_list = [
+        {"function": str.islower, "points": 1},
+        {"function": str.isupper, "points": 2},
+        {"function": str.isdigit, "points": 1},
+    ]
+    for element in str_func_list:
+        if sum(map(element["function"], password)) >= 1:
+            pts += element["points"]
+    if len(password) >= 8:
+        pts += 5
+    if not str.isalnum(password):
+        pts += 3
+    return pts
 
+
+def safest_password():
+    """
+    Uses password_safety_score() to print the most secure password from db and it's score.
+    :return:
+    """
+    result = sql_session.query(Person.password).all()
+    best_result = max((password_safety_score(row.password), row.password)for row in result)
+    best_score = best_result[0]
+    best_password = best_result[1]
+    print(f"Najbezpieczniejsze hasło zdobyło {best_score} punktów i brzmi: '{best_password}'.")
+
+
+def main():
+    """
+    Creates parser, collects arguments and runs appropriate functions.
+    :return:
+    """
     parser = argparse.ArgumentParser()
     subparsers = parser.add_subparsers(dest="born_between")
 
@@ -156,6 +192,8 @@ if __name__ == "__main__":
                         help="Returns number of most common cities")
     parser.add_argument("-p", "--common_password", metavar="",
                         help="Returns number of most common password")
+    parser.add_argument("-s", "--safest_password", action="store_true",
+                        help="Returns the safest password")
 
     args = parser.parse_args()
 
@@ -167,8 +205,15 @@ if __name__ == "__main__":
         most_common_cities(args.common_cities)
     if args.common_password:
         most_common_pw(args.common_password)
+    if args.safest_password:
+        safest_password()
     if args.born_between:
         if args.start_date and args.end_date:
             born_between(args.start_date, args.end_date)
 
-# TODO: funkcja na parsy
+
+if __name__ == "__main__":
+    sql_session = session_creator()
+    main()
+
+# TODO: funkcja na parsy, najbezpieczniejsze hasło, README
