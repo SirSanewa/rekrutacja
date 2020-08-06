@@ -48,9 +48,12 @@ def average_age(option="total"):
         raise ValueError("Used unsupported population")
 
     if option == "total":
-        age_avg = sql_session.query(func.avg(Person.age)).scalar()
+        age_avg = sql_session.query(func.avg(Person.age))\
+            .scalar()
     else:
-        age_avg = sql_session.query(func.avg(Person.age)).filter(Person.gender == option).scalar()
+        age_avg = sql_session.query(func.avg(Person.age))\
+            .filter(Person.gender == option)\
+            .scalar()
 
     if age_avg.is_integer():
         age_avg = int(age_avg)
