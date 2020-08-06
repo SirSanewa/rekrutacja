@@ -216,4 +216,4 @@ if __name__ == "__main__":
     sql_session = session_creator()
     main()
 
-# TODO: funkcja na parsy, najbezpieczniejsze hasło, README
+# TODO: README
