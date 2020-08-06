@@ -83,7 +83,6 @@ def most_common_cities(amount):
     :param amount: int
     :return:
     """
-    print(type(Person.city))
     popular_cities = sqlalch_count_grouped(Person.city, amount)
 
     print(f"Lista {amount} najczęściej występujących miast:")
@@ -223,4 +222,3 @@ def main():
 if __name__ == "__main__":
     sql_session = session_creator()
     main()
-# TODO: README
