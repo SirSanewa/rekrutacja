@@ -48,11 +48,11 @@ def average_age(option="total"):
         raise ValueError("Used unsupported population")
 
     if option == "total":
-        age_avg = sql_session.query(func.avg(Person.age))\
+        age_avg = sql_session.query(func.avg(Person.age)) \
             .scalar()
     else:
-        age_avg = sql_session.query(func.avg(Person.age))\
-            .filter(Person.gender == option)\
+        age_avg = sql_session.query(func.avg(Person.age)) \
+            .filter(Person.gender == option) \
             .scalar()
 
     if age_avg.is_integer():
@@ -104,13 +104,18 @@ def most_common_pw(amount):
         print(f"\tHasło: '{pw}' - użyto {count} razy")
 
 
-def str_to_datetime(date_str):
+def str_to_datetime(date_str, date_type=None):
     """
     Converts date string to datetime object.
+    :param date_type: str
     :param date_str: str
     :return: datetime object
     """
-    return datetime.strptime(date_str, "%Y-%m-%d")
+    if date_type is None:
+        date_str += "T00:00:00.000Z"
+    elif date_type == "end":
+        date_str += "T23:59:59.999Z"
+    return datetime.strptime(date_str, "%Y-%m-%dT%H:%M:%S.%fZ")
 
 
 def born_between(str_start, str_end):
@@ -123,7 +128,7 @@ def born_between(str_start, str_end):
     :return:
     """
     date_start = str_to_datetime(str_start)
-    date_end = str_to_datetime(str_end)
+    date_end = str_to_datetime(str_end, date_type="end")
 
     if date_start > date_end:
         raise ValueError("Wprowadzono niepoprawne daty")
@@ -166,7 +171,7 @@ def safest_password():
     :return:
     """
     result = sql_session.query(Person.password).all()
-    best_result = max((password_safety_score(row.password), row.password)for row in result)
+    best_result = max((password_safety_score(row.password), row.password) for row in result)
     best_score = best_result[0]
     best_password = best_result[1]
     print(f"Najbezpieczniejsze hasło zdobyło {best_score} punktów i brzmi: '{best_password}'.")
@@ -218,5 +223,4 @@ def main():
 if __name__ == "__main__":
     sql_session = session_creator()
     main()
-
 # TODO: README
