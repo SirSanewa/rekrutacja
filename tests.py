@@ -2,7 +2,7 @@ import unittest
 from datetime import datetime
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
-from populate_db import days_till_bd, str_to_dt, clear_phone_nr, password_safety
+from db_populate import days_till_bd, str_to_dt, clear_phone_nr
 from models import Person, Base
 
 
@@ -31,7 +31,6 @@ class TestDB(unittest.TestCase):
             uuid="-",
             username="example",
             password="pw",
-            password_strenght=1,
             salt="-",
             md5="-",
             sha1="-",
@@ -94,11 +93,6 @@ class TestDBPopulate(unittest.TestCase):
     def test_clear_phone_nr(self):
         self.assertEqual(clear_phone_nr(self.nr1), "423213312321")
         self.assertEqual(clear_phone_nr(self.nr2), "54892985")
-
-    def test_password_safety(self):
-        self.assertEqual(password_safety("Abb"), 3)
-        self.assertEqual(password_safety("Abb?83213090"), 12)
-        self.assertEqual(password_safety("aaaaaaa"), 1)
 
     def tearDown(self):
         pass
