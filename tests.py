@@ -2,6 +2,8 @@ import unittest
 from datetime import datetime
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
+
+from app import percentage, average_age
 from db_populate import days_till_bd, str_to_dt, clear_phone_nr
 from models import Person, Base
 
@@ -63,11 +65,25 @@ class TestDB(unittest.TestCase):
         self.assertEqual(result.phone, "123456789")
         self.assertEqual(type(result.dob), datetime)
 
+    def test_gender_proportions(self):
+        total_rows = 1
+        men = self.sql_session.query(Person) \
+            .filter(Person.gender == "male") \
+            .count()
+        self.assertEqual(percentage(men, total_rows), 100)
+        women = self.sql_session.query(Person) \
+            .filter(Person.gender == "female") \
+            .count()
+        self.assertEqual(percentage(women, total_rows), 0)
+
+    def test_avarage_age(self):
+        self.assertRaises(ValueError, average_age, "population")
+
     def tearDown(self):
         pass
 
 
-class TestDBPopulate(unittest.TestCase):
+class TestFunctions(unittest.TestCase):
     def setUp(self):
         self.dob1 = datetime(1991, 10, 29, 0, 0, 0)
         self.dob2 = datetime(2020, 11, 30, 0, 0, 0)
@@ -79,9 +95,12 @@ class TestDBPopulate(unittest.TestCase):
         self.nr1 = "+42 -- 3213 -3123dasd f vcvxfafa [];';]p21a"
         self.nr2 = "54-89-2-985()da"
 
+        self.number = 50
+        self.total = 200
+
     def test_days_till_bd(self):
-        self.assertEqual(days_till_bd(self.dob1), 84)
-        self.assertEqual(days_till_bd(self.dob2), 116)
+        self.assertEqual(days_till_bd(self.dob1), 83)
+        self.assertEqual(days_till_bd(self.dob2), 115)
         self.assertEqual(type(days_till_bd(self.dob1)), int)
 
     def test_str_to_dt(self):
@@ -93,6 +112,9 @@ class TestDBPopulate(unittest.TestCase):
     def test_clear_phone_nr(self):
         self.assertEqual(clear_phone_nr(self.nr1), "423213312321")
         self.assertEqual(clear_phone_nr(self.nr2), "54892985")
+
+    def test_percentage(self):
+        self.assertEqual(percentage(self.number, self.total), 25)
 
     def tearDown(self):
         pass

@@ -12,7 +12,10 @@ def percentage(number, total):
     :param total: int
     :return: percentage: int
     """
-    return (number * 100) / total
+    result = (number * 100) / total
+    if result.is_integer():
+        return int(result)
+    return result
 
 
 def gender_proportions():
